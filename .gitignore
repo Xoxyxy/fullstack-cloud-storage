@@ -9,3 +9,7 @@ server/coverage
 frontend/coverage
 server/.nyc_output
 frontend/.nyc_output
+
+# .env
+server/.env
+frontend/.env
