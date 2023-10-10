@@ -1,0 +1,11 @@
+# Compiled output
+server/dist
+frontend/dist
+server/node_modules
+frontend/node_modules
+
+# Tests
+server/coverage
+frontend/coverage
+server/.nyc_output
+frontend/.nyc_output
