@@ -13,3 +13,6 @@ frontend/.nyc_output
 # .env
 server/.env
 frontend/.env
+
+# uploads
+server/uploads

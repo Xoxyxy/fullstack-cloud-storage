@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { FilesModule } from './files/files.module';
+import { UserEntity } from './users/entities/user.entity';
+import { FileEntity } from './files/entities/file.entity';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { FilesModule } from './files/files.module';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
+        entities: [UserEntity, FileEntity],
         synchronize: true,
       }),
     }),
