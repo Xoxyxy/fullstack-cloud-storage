@@ -2,6 +2,7 @@ import {
   Controller,
   MaxFileSizeValidator,
   ParseFilePipe,
+  Get,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -15,6 +16,11 @@ import { FilesService } from './files.service';
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
+
+  @Get()
+  getAll() {
+    return this.filesService.findAll();
+  }
 
   @Post('upload')
   @UseInterceptors(
@@ -34,7 +40,7 @@ export class FilesController {
       },
     },
   })
-  create(
+  upload(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
