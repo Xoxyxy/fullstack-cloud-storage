@@ -4,25 +4,34 @@ import {
   UsePipes,
   ValidationPipe,
   Body,
-  BadRequestException,
+  HttpCode,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { UsersService } from '../users/users.service';
-import { UserDto } from '../users/dto/user.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthService } from './auth.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginUserDto } from '../users/dto/login-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @UsePipes(new ValidationPipe())
+  @ApiOperation({ summary: 'Register new user' })
   @Post('register')
-  async register(@Body() dto: UserDto) {
-    if (await this.userService.findByEmail(dto.email)) {
-      throw new BadRequestException(
-        `User with ${dto.email} email already exists`,
-      );
-    }
-    return this.userService.create(dto);
+  async register(@Body() dto: CreateUserDto) {
+    return this.authService.register(dto);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @ApiOperation({ summary: 'Login user' })
+  @HttpCode(200)
+  @Post('login')
+  async login(@Body() dto: LoginUserDto) {
+    const { email, password } = await this.authService.validateUser(
+      dto.email,
+      dto.password,
+    );
+    return this.authService.login(email, password);
   }
 }

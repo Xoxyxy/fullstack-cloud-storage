@@ -6,22 +6,27 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { fileStorage } from './storage';
 import { FilesService } from './files.service';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @ApiTags('files')
+@ApiBearerAuth()
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
+  @UseGuards(JwtGuard)
   @Get()
   getAll() {
     return this.filesService.findAll();
   }
 
+  @UseGuards(JwtGuard)
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
