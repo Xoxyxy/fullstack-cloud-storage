@@ -7,12 +7,21 @@ import {
   UploadedFile,
   UseInterceptors,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiTags,
+  ApiOperation,
+} from '@nestjs/swagger';
 import { fileStorage } from './storage';
 import { FilesService } from './files.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { UserId } from '../decorators/user-id.decorator';
+import { FileTypes } from './entities/file.entity';
 
 @ApiTags('files')
 @ApiBearerAuth()
@@ -21,19 +30,20 @@ export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @UseGuards(JwtGuard)
+  @ApiOperation({ summary: 'Get all files' })
   @Get()
-  getAll() {
-    return this.filesService.findAll();
+  getAll(@UserId() userId: number, @Query('type') fileType: FileTypes) {
+    return this.filesService.findAll(userId, fileType);
   }
 
   @UseGuards(JwtGuard)
-  @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: fileStorage,
     }),
   )
   @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload file' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -45,6 +55,7 @@ export class FilesController {
       },
     },
   })
+  @Post('upload')
   upload(
     @UploadedFile(
       new ParseFilePipe({
@@ -56,7 +67,9 @@ export class FilesController {
       }),
     )
     file: Express.Multer.File,
+    @UserId() userId: number,
   ) {
-    return file;
+    console.log(userId);
+    return this.filesService.upload(file, userId);
   }
 }
