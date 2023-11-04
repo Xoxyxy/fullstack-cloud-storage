@@ -13,11 +13,11 @@ export class UsersService {
   ) {}
 
   async findByEmail(email: string): Promise<UserEntity | null> {
-    return this.usersRepository.findOneBy({ email });
+    return await this.usersRepository.findOneBy({ email });
   }
 
   async findById(id: number): Promise<UserEntity> {
-    return this.usersRepository.findOneBy({ id });
+    return await this.usersRepository.findOneBy({ id });
   }
 
   async create(dto: CreateUserDto): Promise<UserEntity> {

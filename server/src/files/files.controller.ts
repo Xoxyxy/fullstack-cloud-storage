@@ -8,6 +8,7 @@ import {
   UseInterceptors,
   UseGuards,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -32,8 +33,8 @@ export class FilesController {
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Get all files' })
   @Get()
-  getAll(@UserId() userId: number, @Query('type') fileType: FileTypes) {
-    return this.filesService.findAll(userId, fileType);
+  async getAll(@UserId() userId: number, @Query('type') fileType: FileTypes) {
+    return await this.filesService.findAll(userId, fileType);
   }
 
   @UseGuards(JwtGuard)
@@ -56,7 +57,7 @@ export class FilesController {
     },
   })
   @Post('upload')
-  upload(
+  async upload(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -69,7 +70,13 @@ export class FilesController {
     file: Express.Multer.File,
     @UserId() userId: number,
   ) {
-    console.log(userId);
-    return this.filesService.upload(file, userId);
+    return await this.filesService.upload(file, userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: 'Remove files' })
+  @Delete()
+  async remove(@UserId() userId: number, @Query('id') ids: string) {
+    return await this.filesService.remove(userId, ids);
   }
 }

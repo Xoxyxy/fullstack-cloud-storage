@@ -14,7 +14,7 @@ export class UsersController {
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Get current user' })
   @Get('me')
-  getMe(@UserId() userId: number) {
-    return this.usersService.findById(userId);
+  async getMe(@UserId() userId: number) {
+    return await this.usersService.findById(userId);
   }
 }

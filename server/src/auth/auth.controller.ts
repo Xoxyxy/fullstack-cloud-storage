@@ -20,7 +20,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Register new user' })
   @Post('register')
   async register(@Body() dto: CreateUserDto) {
-    return this.authService.register(dto);
+    return await this.authService.register(dto);
   }
 
   @UsePipes(new ValidationPipe())
@@ -32,6 +32,6 @@ export class AuthController {
       dto.email,
       dto.password,
     );
-    return this.authService.login(email, password);
+    return await this.authService.login(email, password);
   }
 }

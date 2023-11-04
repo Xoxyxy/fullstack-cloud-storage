@@ -10,28 +10,41 @@ export class FilesService {
     private readonly fileRepository: Repository<FileEntity>,
   ) {}
 
-  findAll(userId: number, fileType: FileTypes): Promise<FileEntity[]> {
+  async findAll(userId: number, fileType: FileTypes): Promise<FileEntity[]> {
     const qb = this.fileRepository.createQueryBuilder('file');
 
     qb.where('file.userId = :userId', { userId });
 
     if (fileType === FileTypes.PHOTOS) {
-      qb.andWhere('file.mimetype ILIKE = :type', { type: '%image%' });
+      qb.andWhere('file.mimetype ILIKE :type', { type: '%image%' });
     }
     if (fileType === FileTypes.TRASH) {
       qb.withDeleted().andWhere('file.deletedAt IS NOT NULL');
     }
 
-    return qb.getMany();
+    return await qb.getMany();
   }
 
-  upload(file: Express.Multer.File, userId: number) {
-    return this.fileRepository.save({
+  async upload(file: Express.Multer.File, userId: number): Promise<FileEntity> {
+    return await this.fileRepository.save({
       filename: file.filename,
       originalName: file.originalname,
       size: file.size,
       mimetype: file.mimetype,
       user: { id: userId },
     });
+  }
+
+  async remove(userId: number, ids: string) {
+    console.log(userId, ids);
+    const idArray = ids.split(',');
+    const qb = this.fileRepository.createQueryBuilder('file');
+
+    qb.where('id IN (:...ids) AND userId = :userId', {
+      ids: idArray,
+      userId,
+    });
+
+    return await qb.softDelete().execute();
   }
 }
