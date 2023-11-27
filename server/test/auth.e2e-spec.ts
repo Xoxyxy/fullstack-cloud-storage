@@ -21,7 +21,7 @@ describe('AuthController (E2E)', () => {
   });
 
   describe('/auth/register (POST)', () => {
-    it('should return a token', async () => {
+    it('should register', async () => {
       const resp = await request(app.getHttpServer())
         .post('/auth/register')
         .send(mockDataForSuccessRegister);
