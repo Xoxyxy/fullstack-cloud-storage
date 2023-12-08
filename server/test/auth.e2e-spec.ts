@@ -1,17 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
+import { faker } from '@faker-js/faker/locale/en';
 import { AppModule } from './../src/app.module';
-import {
-  mockDataForSuccessRegister,
-  mockDataForSuccessLogin,
-  mockDataForFailLogin,
-} from './mock/auth.mock';
 
 describe('AuthController (E2E)', () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -24,7 +20,11 @@ describe('AuthController (E2E)', () => {
     it('should register', async () => {
       const resp = await request(app.getHttpServer())
         .post('/auth/register')
-        .send(mockDataForSuccessRegister);
+        .send({
+          fullName: faker.person.fullName(),
+          email: faker.internet.exampleEmail(),
+          password: faker.internet.password(),
+        });
 
       expect(resp.status).toBe(201);
     });
@@ -40,17 +40,42 @@ describe('AuthController (E2E)', () => {
 
   describe('/auth/login (POST)', () => {
     it('should return a token', async () => {
+      const mockDataForLogin = {
+        email: faker.internet.exampleEmail(),
+        password: faker.internet.password(),
+      };
+
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          ...mockDataForLogin,
+          fullName: faker.person.fullName(),
+        });
+
       const resp = await request(app.getHttpServer())
         .post('/auth/login')
-        .send(mockDataForSuccessLogin);
+        .send(mockDataForLogin);
 
       expect(resp.status).toBe(200);
     });
 
     it('should throw 401 error', async () => {
-      const resp = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send(mockDataForFailLogin);
+      const mockDataForLogin = {
+        email: faker.internet.exampleEmail(),
+        password: faker.internet.password(),
+      };
+
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          ...mockDataForLogin,
+          fullName: faker.person.fullName(),
+        });
+
+      const resp = await request(app.getHttpServer()).post('/auth/login').send({
+        email: mockDataForLogin.email,
+        password: faker.internet.password(),
+      });
 
       expect(resp.status).toBe(401);
     });
@@ -64,7 +89,7 @@ describe('AuthController (E2E)', () => {
     });
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 });

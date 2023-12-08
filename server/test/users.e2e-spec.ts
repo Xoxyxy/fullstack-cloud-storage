@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
+import { faker } from '@faker-js/faker/locale/en';
 import { AppModule } from './../src/app.module';
-import { mockDataForSuccessLogin } from './mock/auth.mock';
 
 describe('UsersController (E2E)', () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -18,9 +18,21 @@ describe('UsersController (E2E)', () => {
 
   describe('/users/me (GET)', () => {
     it('should return a user info', async () => {
+      const mockDataForLogin = {
+        email: faker.internet.exampleEmail(),
+        password: faker.internet.password(),
+      };
+
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          ...mockDataForLogin,
+          fullName: faker.person.fullName(),
+        });
+
       const loginResp = await request(app.getHttpServer())
         .post('/auth/login')
-        .send(mockDataForSuccessLogin);
+        .send(mockDataForLogin);
 
       const resp = await request(app.getHttpServer())
         .get('/users/me')
@@ -30,7 +42,7 @@ describe('UsersController (E2E)', () => {
     });
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 });
